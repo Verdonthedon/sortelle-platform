@@ -1,21 +1,11 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getAuthenticatedUser } from "@/lib/auth";
 
-export async function GET(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: user } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
-
+export async function GET() {
+  const user = await getAuthenticatedUser();
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { data: employees } = await supabaseAdmin
@@ -28,19 +18,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: user } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
-
+  const user = await getAuthenticatedUser();
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
@@ -74,19 +54,9 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: user } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
-
+  const user = await getAuthenticatedUser();
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await req.json();
@@ -112,19 +82,9 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: user } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
-
+  const user = await getAuthenticatedUser();
   if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const searchParams = req.nextUrl.searchParams;

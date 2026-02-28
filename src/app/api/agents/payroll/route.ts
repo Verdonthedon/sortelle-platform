@@ -1,30 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { runAgent } from "@/agents/base-agent";
 import { getPayrollAgentConfig } from "@/agents/payroll-agent";
 import { createSSEStream, sseResponse } from "@/lib/streaming";
 import type Anthropic from "@anthropic-ai/sdk";
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { message, sessionId } = await req.json();
   if (!message) {
     return NextResponse.json({ error: "Message required" }, { status: 400 });
-  }
-
-  const { data: user } = await supabaseAdmin
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
-
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
   let currentSessionId = sessionId;
